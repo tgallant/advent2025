@@ -11,52 +11,44 @@
                   (serapeum:string-join "")
                   (parse-number))))))
 
+(defun next-pos (pos dir val)
+  (-> (match dir
+        ("L" (- pos val))
+        ("R" (+ pos val)))
+      (mod 100)))
+
 (defun pt1 (input)
   (loop with lines = (uiop:read-file-lines input)
         with pos = 50
-        with count = 0
+        with times = 0
         for line in lines
-        do (match (parse-move line)
-             ((cons "L" x)
-              (arrows:-<> (- pos x)
-                          (mod <> 100)
-                          (setq pos <>)))
-             ((cons "R" x)
-              (arrows:-<> (+ pos x)
-                          (mod <> 100)
-                          (setq pos <>))))
+        do (bind (((dir . val) (parse-move line)))
+             (setq pos (next-pos pos dir val)))
         if (= pos 0)
-          do (incf count)
-        finally (return count)))
+          do (incf times)
+        finally (return times)))
 
-(defun times-past-0 (dir pos x)
+(defun next-pos-v2 (pos dir val)
   (loop with p = pos
-        with count = 0
-        for i from 1 to x
+        with times = 0
+        for i from 1 to val
         do (setq p (match dir
                      ("L" (mod (- p 1) 100))
                      ("R" (mod (+ p 1) 100))))
         if (= p 0)
-          do (incf count)
-        finally (return count)))
+          do (incf times)
+        finally (return (cons times p))))
 
 (defun pt2 (input)
   (loop with lines = (uiop:read-file-lines input)
         with pos = 50
-        with count = 0
+        with times = 0
         for line in lines
-        do (match (parse-move line)
-             ((cons "L" x)
-              (setq count (+ count (times-past-0 "L" pos x)))
-              (arrows:-<> (- pos x)
-                          (mod <> 100)
-                          (setq pos <>)))
-             ((cons "R" x)
-              (setq count (+ count (times-past-0 "R" pos x)))
-              (arrows:-<> (+ pos x)
-                          (mod <> 100)
-                          (setq pos <>))))
-        finally (return count)))
+        do (bind (((dir . val) (parse-move line))
+                  ((tms . nxt) (next-pos-v2 pos dir val)))
+             (setq times (+ times tms))
+             (setq pos nxt))
+        finally (return times)))
 
 (def-suite 01-solution)
 (in-suite 01-solution)
