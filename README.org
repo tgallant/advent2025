@@ -1,3 +1,5 @@
 * advent of code 2025
 
+ [[https://github.com/tgallant/advent2025/actions/workflows/solutions.yaml/badge.svg]]
+
   Solutions written in Common Lisp using [[https://github.com/ciel-lang/CIEL][ciel]].
