@@ -1,0 +1,3 @@
+* advent of code 2025
+
+  Solutions written in Common Lisp using [[https://github.com/ciel-lang/CIEL][ciel]].
