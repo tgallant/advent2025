@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ciel-lang/CIEL
-          ref: v0.2.1
+          ref: 9957957
           fetch-depth: 0
 
       - name: Log in to GitHub Container Registry
@@ -28,4 +28,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:v0.2.1
+          tags: ghcr.io/${{ github.repository }}:v1.0.0
