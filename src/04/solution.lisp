@@ -46,6 +46,30 @@
                             (incf num)))))
         finally (return num)))
 
+(defun pt2 (input)
+  (loop with lines = (->> (uiop:read-file-lines input)
+                          (mapcar (lambda (line)
+                                    (str:split-omit-nulls "" line))))
+        with total = 0
+        with ready = nil
+        while t
+        do (loop with rlen = (length (car lines))
+                 with clen = (length lines)
+                 for r from 0 to (1- rlen)
+                 do (loop for c from 0 to (1- clen)
+                          do (-> (getval lines r c)
+                                 (lambda (val)
+                                   (when (and (equal val "@")
+                                              (-> (count-adj lines r c)
+                                                  (< 4)))
+                                     (push (list r c) ready))))))
+        if (eq ready nil)
+          do (return total)
+        do (loop for (ar ac) in ready
+                 do (incf total)
+                 do (setf (nth ac (nth ar lines)) "x"))
+        do (setq ready nil)))
+
 (def-suite 04-solution)
 (in-suite 04-solution)
 
@@ -53,7 +77,13 @@
   (is (= (pt1 "test.txt") 13)))
 
 (test pt1-input
-  (is (= (pt1 "input.txt") 13)))
+  (is (= (pt1 "input.txt") 1437)))
+
+(test pt2-test
+  (is (= (pt2 "test.txt") 43)))
+
+(test pt2-input
+  (is (= (pt2 "input.txt") 8765)))
 
 (defun main ()
   (run! '04-solution))
