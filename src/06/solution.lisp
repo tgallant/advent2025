@@ -40,7 +40,6 @@
 (defun pad-nums (nums n)
   (loop with results = nil
         for num in nums
-        do (print num)
         do (loop with val = num
                  while t
                  if (= (length val) n)
@@ -65,48 +64,38 @@
 
 
 (defun make-seqs (rows)
-  (print rows)
   (loop with cols = (length (car rows))
         with ops = (car (last rows))
         with seqs = nil
         with start = nil
-        with op = nil
         for i from 0 to (1- cols)
-        do (print i)
-        do (print start)
-        do (print op)
-        do (print seqs)
-        do (match (nth i ops)
-             ("+" (setq op #'+))
-             ("*" (setq op #'*)))
-        if (and (eq start nil)
-                (not (eq op nil)))
-          do (setq start i)
-        if (and (not (eq start nil))
-                (not (eq op nil))
-                (not (eq i 0)))
+        if (match (nth i ops)
+             ("+" t)
+             ("*" t))
           do (progn
-               (->> (list start (1- i))
-                    (list)
-                    (append seqs)
-                    (setq seqs))
-               (print "HERE?")
-               (setq start i)
-               (setq op nil))
-        finally (return seqs)))
+               (if (eq start nil)
+                   (setq start i)
+                   (progn
+                     (setq seqs (append seqs (list (list start (1- i)))))
+                     (setq start i))))
+        finally (-> (append seqs (list (list start (1- cols))))
+                    (return))))
 
 (defun parse-seq (seq)
-  (->> seq
-       (mapcar (lambda (row)
-                 (serapeum:string-join row "")))
-       (lambda (joined)
-         (list (-> (elt joined (1- (length joined)))
-                   (lambda (val)
-                     (match val
-                       ("*" #'*)
-                       ("+" #'+))))
-               (->> (subseq joined 0 (1- (length joined)))
-                    (mapcar #'parse-number))))))
+  (let ((op nil)
+        (len (length (car seq))))
+    (setq op (match (nth (1- len) (car seq))
+               ("*" #'*)
+               ("+" #'+)))
+    (setf (nth (1- len) (car seq)) " ")
+    (->> seq
+      (mapcar (lambda (row)
+                (serapeum:string-join row "")))
+      (lambda (joined)
+        (list op
+              (->> (subseq joined 0 (1- (length joined)))
+                   (mapcar #'str:trim)
+                   (mapcar #'parse-number)))))))
 
 (defun collect-seq (rows lo hi)
   (loop with seq = nil
@@ -133,31 +122,6 @@
                (push results))
         finally (return (reduce #'+ results))))
 
-;; with cols = (length (car lines))
-;; with opr = nil
-;; with nums = nil
-;; with results = nil
-;; with val = nil
-;; for i from 0 to (1- cols)
-;; do (setq val (->> (last lines)
-;;                (car)
-;;                (nth i)))
-;; if (match val
-;;      ("+" t)
-;;      ("*" t))
-;; if (not (eq nil nums))
-;; do (progn
-;;      (setq results (append results (list nums)))
-;;      (setq opr val))
-;; else
-;; do (-> (collect-seq lines ))
-;; do (-> (parse-op lines i)
-;;        (lambda (op)
-;;          (print op)
-;;          (->> (convert-nums (cadr op))
-;;            (reduce (car op))))
-;;        (push results))
-
 (def-suite 06-solution)
 (in-suite 06-solution)
 
@@ -166,6 +130,12 @@
 
 (test pt1-input
   (is (= (pt1 "input.txt") 4405895212738)))
+
+(test pt2-test
+  (is (= (pt2 "test.txt") 3263827)))
+
+(test pt2-input
+  (is (= (pt2 "input.txt") 7450962489289)))
 
 (defun main ()
   (run! '06-solution))
